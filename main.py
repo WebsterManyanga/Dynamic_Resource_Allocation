@@ -1,3 +1,5 @@
+import heapq
+
 class Process:
     def __init__(self, pid, priority, required_memory, cpu_time):
         self.pid = pid
@@ -17,4 +19,34 @@ class ResourcePool:
 
     def release(self, process):
         self.allocated_memory -= process.required_memory
+
+class Scheduler:
+    def __init__(self, resource_pool):
+        self.ready_queue = []
+        self.waiting_queue = []
+        self.resource_pool = resource_pool
+
+    def add_process(self, process):
+        heapq.heappush(self.ready_queue, process)
+
+    def dispatch(self):
+        if not self.ready_queue:
+            return None
+        return heapq.heappop(self.ready_queue)
+
+    def run(self):
+        while self.ready_queue or self.waiting_queue:
+            if not self.ready_queue:
+                for p in self.waiting_queue:
+                    heapq.heappush(self.ready_queue, p)
+                self.waiting_queue.clear()
+
+            current = self.dispatch()
+            if self.resource_pool.can_allocate(current):
+                self.resource_pool.allocate(current)
+                print(f"Running process {current.pid}")
+                self.resource_pool.release(current)
+            else:
+                self.waiting_queue.append(current)
+
 

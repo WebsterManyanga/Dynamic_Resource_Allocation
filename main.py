@@ -7,6 +7,10 @@ class Process:
         self.required_memory = required_memory
         self.cpu_time = cpu_time
 
+    # To allow for heap comparison
+    def __lt__(self, other):
+        return self.priority > other.priority
+
 
 class ResourcePool:
     def __init__(self, total_memory):
@@ -25,6 +29,7 @@ class Scheduler:
         self.ready_queue = []
         self.waiting_queue = []
         self.resource_pool = resource_pool
+
 
     def add_process(self, process):
         heapq.heappush(self.ready_queue, process)
@@ -50,3 +55,21 @@ class Scheduler:
                 self.waiting_queue.append(current)
 
 
+pool = ResourcePool(total_memory=3)
+scheduler = Scheduler(pool)
+
+# Sample processes (PID, priority, memory_needed, cpu_time)
+processes = [
+        Process("P1", priority=1, required_memory=1, cpu_time=4),
+        Process("P2", priority=3, required_memory=1, cpu_time=2),
+        Process("P3", priority=2, required_memory=2, cpu_time=5),
+        Process("P4", priority=5, required_memory=3, cpu_time=1),
+        Process("P5", priority=4, required_memory=2, cpu_time=3),
+]
+
+# Add processes to scheduler
+for process in processes:
+    scheduler.add_process(process)
+
+# Run the scheduler
+scheduler.run()
